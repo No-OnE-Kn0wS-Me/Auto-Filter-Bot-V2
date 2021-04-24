@@ -27,6 +27,16 @@ class Singleton(type):
 
 class Database(metaclass=Singleton):
 
+    def __init__(self):
+        self._client = pymongo.MongoClient(DATABASE_URI)
+        self.db = self._client["Adv_Auto_Filter"]
+        self.col = self.db["Main"]
+        self.acol = self.db["Active_Chats"]
+        self.fcol = self.db["Filter_Collection"]
+        
+        self.cache = {}
+        self.acache = {}
+
 async def savefiles(docs, group_id):
     mycol = mydb[str(group_id)]
     
