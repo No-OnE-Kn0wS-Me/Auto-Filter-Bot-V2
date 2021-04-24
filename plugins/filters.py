@@ -58,7 +58,8 @@ async def filter(client: Bot, message: Message):
                         asyncio.sleep(e.x)
                         bot_= await bot.get_me()
                         FIND["usr_bot_me"] = bot_
-                
+
+                btn = []
                 bot_ = FIND.get("usr_bot_me")
                 file_link = f"https://t.me/{bot_.username}?start={unique_id}"
             
