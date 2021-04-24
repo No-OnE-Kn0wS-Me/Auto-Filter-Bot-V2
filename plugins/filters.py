@@ -18,21 +18,41 @@ from pyrogram.types import (
     CallbackQuery
 )
 
+from pyrogram.errors import ButtonDataInvalid, FloodWait
 from bot import Bot
 from script import script
 from database.mdb import searchquery
 from plugins.channel import deleteallfilters
 from config import AUTH_USERS
+from database.mdb import Database
 
 BUTTONS = {}
- 
+db = Database()
+
 @Client.on_message(filters.group & filters.text)
 async def filter(client: Bot, message: Message):
     if re.findall("((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
         return
+    if ("https://" or "http://") in update.text:
+        return
+    
+    query = re.sub(r"[1-2]\d{3}", "", update.text) # Targetting Only 1000 - 2999 😁
 
     if 2 < len(message.text) < 50:    
         btn = []
+    if pm_fchat:
+                unique_id = filter.get("unique_id")
+                if not Find.get("usr_bot_me"):
+                    try:
+                        bot_= await bot.get_me()
+                        Find["usr_bot_me"] = bot_
+                    except FloodWait as e:
+                        asyncio.sleep(e.x)
+                        bot_= await bot.get_me()
+                        Find["usr_bot_me"] = bot_
+
+                bot_ = Find.get("usr_bot_me")
+                file_link = f"https://t.me/{bot_.username}?start={unique_id}"
 
         group_id = message.chat.id
         name = message.text
