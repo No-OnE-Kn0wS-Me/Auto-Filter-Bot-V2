@@ -1,78 +1,136 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# @trojanzhex
-
-
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram import filters, Client
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 from script import script
+from database.mdb import Database # pylint: disable=import-error
 
+db = Database()
 
-@Client.on_message(filters.command(["start"]) & filters.private)
-async def start(client, message):
+@Client.on_message(filters.command(["start"]) & filters.private, group=1)
+async def start(bot, update):
+    
     try:
-        await message.reply_text(
-            text=script.START_MSG.format(message.from_user.mention),
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [
+        file_uid = update.command[1]
+    except IndexError:
+        file_uid = False
+    
+    if file_uid:
+        file_id, file_type = await db.get_file(file_uid)
+        
+        if (file_id or file_type) == None:
+            return
+        
+        if file_type == "document":
+        
+            await bot.send_document(
+                chat_id=update.chat.id,
+                document = file_id,
+                caption = '',
+                reply_to_message_id=update.message_id,
+                reply_markup=InlineKeyboardMarkup(
                     [
-                        InlineKeyboardButton("HELP", callback_data="help_data"),
-                        InlineKeyboardButton("ABOUT", callback_data="about_data"),
-                    ],
-                    [
-                        InlineKeyboardButton(
-                            "⭕️ JOIN OUR CHANNEL ⭕️", url="https://t.me/TroJanzHEX")
+                        [
+                            InlineKeyboardButton
+                                (
+                                    'Developers', url="https://t.me/CrazyBotsz"
+                                )
+                        ]
                     ]
-                ]
-            ),
-            reply_to_message_id=message.message_id
-        )
-    except:
-        pass
+                )
+            )
 
-@Client.on_message(filters.command(["help"]) & filters.private)
-async def help(client, message):
-    try:
-        await message.reply_text(
-            text=script.HELP_MSG,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [
+        elif file_type == "video":
+        
+            await update.reply_video(
+                file_id,
+                quote=True,
+                reply_markup=InlineKeyboardMarkup(
                     [
-                        InlineKeyboardButton("BACK", callback_data="start_data"),
-                        InlineKeyboardButton("ABOUT", callback_data="about_data"),
-                    ],
-                    [
-                        InlineKeyboardButton(
-                            "⭕️ SUPPORT ⭕️", url="https://t.me/TroJanzSupport")
+                        [
+                            InlineKeyboardButton
+                                (
+                                    'My Dev 👨‍🔬', url="https://t.me/CrazyBotsz"
+                                )
+                        ]
                     ]
-                ]
-            ),
-            reply_to_message_id=message.message_id
-        )
-    except:
-        pass
+                )
+            )
+            
+        elif file_type == "audio":
+        
+            await update.reply_audio(
+                file_id,
+                quote=True,
+                reply_markup=InlineKeyboardMarkup(
+                    [
+                        [
+                            InlineKeyboardButton
+                                (
+                                    'My Dev 👨‍🔬', url="https://t.me/CrazyBotsz"
+                                )
+                        ]
+                    ]
+                )
+            )
 
-@Client.on_message(filters.command(["about"]) & filters.private)
-async def about(client, message):
-    try:
-        await message.reply_text(
-            text=script.ABOUT_MSG,
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(
-                [
-                    [
-                        InlineKeyboardButton("BACK", callback_data="help_data"),
-                        InlineKeyboardButton("START", callback_data="start_data"),
-                    ],
-                    [
-                        InlineKeyboardButton(
-                            "SOURCE CODE", url="https://github.com/TroJanzHEX/Auto-Filter-Bot-V2")
-                    ]
-                ]
-            ),
-            reply_to_message_id=message.message_id
-        )
-    except:
-        pass
+        else:
+            print(file_type)
+        
+        return
+
+    buttons = [[
+        InlineKeyboardButton('Developers', url='https://t.me/CrazyBotsz'),
+        InlineKeyboardButton('Source Code 🧾', url ='https://github.com/AlbertEinsteinTG/Adv-Auto-Filter-Bot-V2')
+    ],[
+        InlineKeyboardButton('Support 🛠', url='https://t.me/CrazyBotszGrp')
+    ],[
+        InlineKeyboardButton('Help ⚙', callback_data="help")
+    ]]
+    
+    reply_markup = InlineKeyboardMarkup(buttons)
+    
+    await bot.send_message(
+        chat_id=update.chat.id,
+        text=script.START_MSG.format(message.from_user.mention),
+        reply_markup=reply_markup,
+        parse_mode="html",
+        reply_to_message_id=update.message_id
+    )
+
+
+@Client.on_message(filters.command(["help"]) & filters.private, group=1)
+async def help(bot, update):
+    buttons = [[
+        InlineKeyboardButton('Home ⚡', callback_data='start'),
+        InlineKeyboardButton('About 🚩', callback_data='about')
+    ],[
+        InlineKeyboardButton('Close 🔐', callback_data='close')
+    ]]
+    
+    reply_markup = InlineKeyboardMarkup(buttons)
+    
+    await bot.send_message(
+        chat_id=update.chat.id,
+        text=script.HELP_MSG,
+        reply_markup=reply_markup,
+        parse_mode="html",
+        reply_to_message_id=update.message_id
+    )
+
+
+@Client.on_message(filters.command(["about"]) & filters.private, group=1)
+async def about(bot, update):
+    
+    buttons = [[
+        InlineKeyboardButton('Home ⚡', callback_data='start'),
+        InlineKeyboardButton('Close 🔐', callback_data='close')
+    ]]
+    reply_markup = InlineKeyboardMarkup(buttons)
+    
+    await bot.send_message(
+        chat_id=update.chat.id,
+        text=script.ABOUT_MSG,
+        reply_markup=reply_markup,
+        disable_web_page_preview=True,
+        parse_mode="html",
+        reply_to_message_id=update.message_id
+    )
