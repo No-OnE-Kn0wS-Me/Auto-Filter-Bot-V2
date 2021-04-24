@@ -44,7 +44,7 @@ async def filter(client: Bot, message: Message):
     
     if filters:
         for filter in filters: # iterating through each files
-            name = message.text
+            file_name = filter.get("file_name")
             group_id = message.chat.id
             file_link = filter.get("file_link")
 
