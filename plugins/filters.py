@@ -40,6 +40,14 @@ async def filter(client: Bot, message: Message):
 
     if 2 < len(message.text) < 50:    
         btn = []
+    filters = await db.get_filters(group_id, query)
+    
+    if filters:
+        for filter in filters: # iterating through each files
+            name = message.text
+            group_id = message.chat.id
+            file_link = filter.get("file_link")
+
     if pm_fchat:
                 unique_id = filter.get("unique_id")
                 if not Find.get("usr_bot_me"):
@@ -53,9 +61,7 @@ async def filter(client: Bot, message: Message):
 
                 bot_ = Find.get("usr_bot_me")
                 file_link = f"https://t.me/{bot_.username}?start={unique_id}"
-
-        group_id = message.chat.id
-        name = message.text
+                 
 
         filenames, links = await searchquery(group_id, name)
         if filenames and links:
