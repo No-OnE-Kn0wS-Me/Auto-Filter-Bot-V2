@@ -15,7 +15,17 @@ from config import DATABASE_URI, DATABASE_NAME
 myclient = pymongo.MongoClient(DATABASE_URI)
 mydb = myclient[DATABASE_NAME]
 
+class Singleton(type):
+    __instances__ = {}
 
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls.__instances__:
+            cls.__instances__[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+
+        return cls.__instances__[cls]
+
+
+class Database(metaclass=Singleton):
 
 async def savefiles(docs, group_id):
     mycol = mydb[str(group_id)]
@@ -25,6 +35,17 @@ async def savefiles(docs, group_id):
     except Exception:
         pass
 
+async def get_file(self, uid: str):
+
+        file = await self.fcol.find_one({"unique_id": uid})
+        file_id = None
+        file_type = None
+
+        if file:
+            file_id = file.get("file_id")
+            file_type = file.get("file_type")
+
+        return file_id, file_type
 
 async def channelgroup(channel_id, channel_name, group_id, group_name):
     mycol = mydb["ALL DETAILS"]
