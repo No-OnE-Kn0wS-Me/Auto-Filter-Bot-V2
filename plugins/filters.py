@@ -48,29 +48,28 @@ async def filter(client: Bot, message: Message):
             group_id = message.chat.id
             file_link = filter.get("file_link")
 
-    if pm_fchat:
+    if pm_file_chat: 
                 unique_id = filter.get("unique_id")
-                if not Find.get("usr_bot_me"):
+                if not FIND.get("usr_bot_me"):
                     try:
                         bot_= await bot.get_me()
-                        Find["usr_bot_me"] = bot_
+                        FIND["usr_bot_me"] = bot_
                     except FloodWait as e:
                         asyncio.sleep(e.x)
                         bot_= await bot.get_me()
-                        Find["usr_bot_me"] = bot_
-
-                bot_ = Find.get("usr_bot_me")
+                        FIND["usr_bot_me"] = bot_
+                
+                bot_ = FIND.get("usr_bot_me")
                 file_link = f"https://t.me/{bot_.username}?start={unique_id}"
-                 
-
-        filenames, links = await searchquery(group_id, name)
-        if filenames and links:
-            for filename, link in zip(filenames, links):
-                btn.append(
-                    [InlineKeyboardButton(text=f"{filename}",url=f"{link}")]
-                )
-        else:
-            return
+            
+            results.append(
+                [
+                    InlineKeyboardButton(file_name, url=file_link)
+                ]
+            )
+        
+    else:
+        return
 
         if not btn:
             return
