@@ -64,7 +64,6 @@ async def filter(client: Bot, message: Message):
                 
                 bot_ = FIND.get("usr_bot_me")
                 file_link = f"https://t.me/{bot_.username}?start={unique_id}"
-            
             btn.append(
                 [
                     InlineKeyboardButton(file_name, url=file_link)
