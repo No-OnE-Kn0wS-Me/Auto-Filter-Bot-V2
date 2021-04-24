@@ -48,7 +48,10 @@ async def filter(client: Bot, message: Message):
             group_id = message.chat.id
             file_link = filter.get("file_link")
 
-    if pm_file_chat: 
+    if len(btn) >= max_results:
+                break
+            
+            if pm_file_chat: 
                 unique_id = filter.get("unique_id")
                 if not FIND.get("usr_bot_me"):
                     try:
@@ -58,8 +61,7 @@ async def filter(client: Bot, message: Message):
                         asyncio.sleep(e.x)
                         bot_= await bot.get_me()
                         FIND["usr_bot_me"] = bot_
-
-                btn = []
+                
                 bot_ = FIND.get("usr_bot_me")
                 file_link = f"https://t.me/{bot_.username}?start={unique_id}"
             
@@ -70,10 +72,11 @@ async def filter(client: Bot, message: Message):
             )
         
     else:
-        return
+        return # return if no files found for that query
+    
 
-        if not btn:
-            return
+    if len(btn) == 0: # double check
+        return
 
         if len(btn) > 10: 
             btns = list(split_list(btn, 10)) 
