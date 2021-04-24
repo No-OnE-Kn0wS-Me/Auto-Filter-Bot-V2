@@ -18,64 +18,36 @@ from pyrogram.types import (
     CallbackQuery
 )
 
-from pyrogram.errors import ButtonDataInvalid, FloodWait
 from bot import Bot
 from script import script
 from database.mdb import searchquery
 from plugins.channel import deleteallfilters
 from config import AUTH_USERS
-from database.mdb import Database
 
 BUTTONS = {}
-db = Database()
-
+ 
 @Client.on_message(filters.group & filters.text)
 async def filter(client: Bot, message: Message):
     if re.findall("((^\/|^,|^!|^\.|^[\U0001F600-\U000E007F]).*)", message.text):
         return
-    if ("https://" or "http://") in update.text:
-        return
-    
-    query = re.sub(r"[1-2]\d{3}", "", update.text) # Targetting Only 1000 - 2999 😁
 
     if 2 < len(message.text) < 50:    
         btn = []
-    filters = await db.get_filters(group_id, query)
-    
-    if filters:
-        for filter in filters: # iterating through each files
-            file_name = filter.get("file_name")
-            group_id = message.chat.id
-            file_link = filter.get("file_link")
 
-    if len(btn) >= max_results:
-                break
-            
-            if pm_file_chat: 
-                unique_id = filter.get("unique_id")
-                if not FIND.get("usr_bot_me"):
-                    try:
-                        bot_= await bot.get_me()
-                        FIND["usr_bot_me"] = bot_
-                    except FloodWait as e:
-                        asyncio.sleep(e.x)
-                        bot_= await bot.get_me()
-                        FIND["usr_bot_me"] = bot_
-                
-                bot_ = FIND.get("usr_bot_me")
-                file_link = f"https://t.me/{bot_.username}?start={unique_id}"
-            btn.append(
-                [
-                    InlineKeyboardButton(file_name, url=file_link)
-                ]
-            )
-        
-    else:
-        return # return if no files found for that query
-    
+        group_id = message.chat.id
+        name = message.text
 
-    if len(btn) == 0: # double check
-        return
+        filenames, links = await searchquery(group_id, name)
+        if filenames and links:
+            for filename, link in zip(filenames, links):
+                btn.append(
+                    [InlineKeyboardButton(text=f"{filename}",url=f"{link}")]
+                )
+        else:
+            return
+
+        if not btn:
+            return
 
         if len(btn) > 10: 
             btns = list(split_list(btn, 10)) 
